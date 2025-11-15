@@ -155,6 +155,8 @@ Luego usa desde cualquier lugar:
 ```bash
 codescanner archivo.js
 codescanner src/
+ó
+codescanner .
 ```
 
 **Método 2: Clonar e instalar desde GitHub**
