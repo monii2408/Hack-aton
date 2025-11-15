@@ -47,6 +47,14 @@ CodeScanner está diseñado para:
 ### 🔍 Análisis Línea por Línea
 El scanner recorre cada línea de código aplicando reglas de seguridad basadas en expresiones regulares y patrones conocidos de vulnerabilidades.
 
+### 📁 Tipos de Archivos Soportados
+- **✅ JavaScript/TypeScript** (`.js`, `.jsx`, `.ts`, `.tsx`) - Soporte completo
+- **⚠️ HTML** (`.html`) - Soporte parcial (XSS, secretos, HTTP)
+- **⚠️ Archivos de texto** (`.txt`, `.log`) - Soporte básico (solo secretos y tokens)
+- **❌ Python, C, C++, Java** - No soportados actualmente (las reglas están optimizadas para JavaScript)
+
+**Nota:** CodeScanner está optimizado principalmente para proyectos JavaScript/TypeScript/Node.js. Para más detalles, ver [TIPOS-ARCHIVOS-SOPORTADOS.md](TIPOS-ARCHIVOS-SOPORTADOS.md).
+
 ### 🛡️ Detección de Vulnerabilidades Críticas
 
 CodeScanner detecta las siguientes categorías de vulnerabilidades:
