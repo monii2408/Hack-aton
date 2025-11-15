@@ -140,7 +140,7 @@ Si quieres usar `codescanner` desde cualquier terminal sin estar en el proyecto:
 **Método 1: Desde npm (si está publicado) - MÁS SIMPLE**
 
 ```bash
-npm install -g codescanner
+npm install -g @jovele6/codescanner
 ```
 
 Luego usa desde cualquier lugar:
@@ -287,6 +287,11 @@ codescanner src/
 
 ```bash
 npm install -g "git+https://github.com/Camila-jovel/Hack-aton.git#main:backend"
+```
+
+**Nota:** El paquete también está publicado en npm como `@jovele6/codescanner`. Puedes instalarlo con:
+```bash
+npm install -g @jovele6/codescanner
 ```
 
 **4. Interpretar el resultado**
