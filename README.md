@@ -116,19 +116,37 @@ CodeScanner está construido con una arquitectura modular y escalable:
 
 ### Instalación Rápida (Recomendada)
 
-**Para usar CodeScanner desde cualquier terminal:**
+**⚠️ IMPORTANTE: Primero debes instalar CodeScanner antes de usarlo.**
+
+**Paso 1: Instalar CodeScanner desde GitHub**
+
+Abre cualquier terminal (PowerShell, CMD, Git Bash) y ejecuta:
 
 ```bash
 npm install -g git+https://github.com/Camila-jovel/Hack-aton.git#main
 ```
 
-Luego usa desde cualquier lugar:
+**Paso 2: Verificar la instalación**
+
+```bash
+codescanner --help
+```
+
+Si ves el mensaje de ayuda, la instalación fue exitosa.
+
+**Paso 3: Usar CodeScanner**
+
+Ahora puedes usar `codescanner` desde cualquier lugar:
+
 ```bash
 codescanner archivo.js
 codescanner src/
+codescanner .
 ```
 
 **¡Eso es todo!** No necesitas clonar el repositorio ni tener Git instalado. npm lo descarga automáticamente.
+
+**Nota:** Si ves el error "codescanner no se reconoce", significa que aún no está instalado. Ejecuta el comando de instalación del Paso 1.
 
 ### Instalación
 
