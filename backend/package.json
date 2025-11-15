@@ -7,6 +7,10 @@
     "codescanner": "./cli.js"
   },
   "preferGlobal": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Camila-jovel/Hack-aton.git"
+  },
   "scripts": {
     "start": "node server.js",
     "scan": "node cli.js",
@@ -21,7 +25,12 @@
     "scanner",
     "vulnerability",
     "owasp",
-    "code-analysis"
-  ]
+    "code-analysis",
+    "static-analysis",
+    "security-audit"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }
 

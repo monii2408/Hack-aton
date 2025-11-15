@@ -114,6 +114,22 @@ CodeScanner está construido con una arquitectura modular y escalable:
 - Node.js 18 o superior
 - npm (incluido con Node.js)
 
+### Instalación Rápida (Recomendada)
+
+**Para usar CodeScanner desde cualquier terminal:**
+
+```bash
+npm install -g git+https://github.com/Camila-jovel/Hack-aton.git#main
+```
+
+Luego usa desde cualquier lugar:
+```bash
+codescanner archivo.js
+codescanner src/
+```
+
+**¡Eso es todo!** No necesitas clonar el repositorio ni tener Git instalado. npm lo descarga automáticamente.
+
 ### Instalación
 
 1. **Clonar o descargar el repositorio**
@@ -174,35 +190,46 @@ CodeScanner incluye una interfaz de línea de comandos que permite analizar cód
 
 **Instalación Global (desde cualquier computadora)**
 
-Para usar CodeScanner desde cualquier terminal en cualquier computadora:
+Para usar CodeScanner desde cualquier terminal en cualquier computadora, **NO necesitas clonar el repositorio manualmente**. npm descarga e instala automáticamente desde GitHub con un solo comando:
 
-1. **Instalar globalmente**
-   ```bash
-   cd backend
-   npm install -g .
-   ```
-   
-   O si tienes el proyecto en GitHub:
-   ```bash
-   npm install -g git+https://github.com/Camila-jovel/Hack-aton.git#main
-   ```
+**Instalación desde GitHub (RECOMENDADO)**
 
-2. **Usar desde cualquier lugar**
-   ```bash
-   # Desde cualquier directorio, analizar un archivo
-   codescanner archivo.js
+```bash
+npm install -g git+https://github.com/Camila-jovel/Hack-aton.git#main
+```
 
-   # Analizar una carpeta completa
-   codescanner src/
+**Ventajas:**
+- ✅ Un solo comando
+- ✅ npm descarga automáticamente desde GitHub
+- ✅ No necesitas tener Git instalado (npm lo maneja internamente)
+- ✅ Se instala globalmente, disponible desde cualquier terminal
+- ✅ Funciona en Windows, Mac y Linux
 
-   # Analizar la carpeta actual
-   codescanner .
-   ```
+**Usar desde cualquier lugar**
 
-3. **Desinstalar (si es necesario)**
-   ```bash
-   npm uninstall -g codescanner
-   ```
+Una vez instalado, puedes usar `codescanner` desde cualquier directorio:
+
+```bash
+# Analizar un archivo específico
+codescanner archivo.js
+
+# Analizar una carpeta completa (recursivo)
+codescanner src/
+
+# Analizar la carpeta actual
+codescanner .
+
+# Ver ayuda
+codescanner --help
+```
+
+**Desinstalar (si es necesario)**
+
+```bash
+npm uninstall -g codescanner
+```
+
+**Nota:** Si prefieres tener el código fuente localmente, puedes clonar el repositorio y luego ejecutar `npm install -g .` desde la carpeta `backend`.
 
 **4. Interpretar el resultado**
 
