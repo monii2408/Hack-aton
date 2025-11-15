@@ -1,6 +1,6 @@
 {
-  "name": "@jovele6/codescanner",
-  "version": "1.0.0",
+  "name": "2jgoatscanner",
+  "version": "1.0.1",
   "description": "CodeScanner - Analizador de vulnerabilidades de seguridad",
   "main": "server.js",
   "bin": {

@@ -70,10 +70,10 @@ npm publish
 Cualquiera podrá instalar CodeScanner con:
 
 ```bash
-npm install -g @jovele6/codescanner
+npm install -g 2jgoatscanner
 ```
 
-**Nota:** El paquete se publicó con el scope `@jovele6/` porque el nombre `codescanner` ya estaba tomado. Esto es común y recomendado para mantener tu paquete bajo tu organización/usuario.
+**Nota:** El paquete se publicó con el nombre `2jgoatscanner` porque el nombre `codescanner` ya estaba tomado.
 
 Y usarlo desde cualquier terminal:
 
