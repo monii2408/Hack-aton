@@ -7,25 +7,31 @@ Este documento explica cómo instalar CodeScanner globalmente para usarlo desde 
 - Node.js 18 o superior instalado
 - npm (incluido con Node.js)
 
-## Método 1: Instalación desde el Repositorio Local
+## Método 1: Instalación desde el Repositorio Local (RECOMENDADO)
 
 Si tienes el proyecto descargado localmente:
 
 ```bash
-# Navegar a la carpeta backend
+# 1. Clonar el repositorio
+git clone https://github.com/Camila-jovel/Hack-aton.git
+cd Hack-aton
+
+# 2. Navegar a la carpeta backend
 cd backend
 
-# Instalar globalmente
+# 3. Instalar globalmente
 npm install -g .
 ```
 
-## Método 2: Instalación desde GitHub
+## Método 2: Instalación desde GitHub (Especificando subcarpeta)
 
-Si el proyecto está en GitHub:
+Si el proyecto está en GitHub, debes especificar que el `package.json` está en `backend/`:
 
 ```bash
-npm install -g git+https://github.com/Camila-jovel/Hack-aton.git#main
+npm install -g "git+https://github.com/Camila-jovel/Hack-aton.git#main:backend"
 ```
+
+**Nota:** El formato `:backend` le dice a npm que busque el `package.json` en la subcarpeta `backend/`.
 
 O si quieres instalar desde una rama específica:
 

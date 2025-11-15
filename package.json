@@ -1,0 +1,24 @@
+{
+  "name": "codescanner-root",
+  "version": "1.0.0",
+  "description": "CodeScanner - Analizador de vulnerabilidades de seguridad",
+  "private": true,
+  "workspaces": [
+    "backend"
+  ],
+  "scripts": {
+    "scan": "cd backend && node cli.js",
+    "start": "cd backend && node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Camila-jovel/Hack-aton.git"
+  },
+  "keywords": [
+    "security",
+    "scanner",
+    "vulnerability",
+    "owasp"
+  ]
+}
+

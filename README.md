@@ -137,8 +137,19 @@ chmod +x codescanner.sh
 
 Si quieres usar `codescanner` desde cualquier terminal sin estar en el proyecto:
 
+**IMPORTANTE:** El `package.json` está en la carpeta `backend/`, por lo que debes instalar desde ahí:
+
 ```bash
-npm install -g git+https://github.com/Camila-jovel/Hack-aton.git#main
+# Método 1: Clonar primero y luego instalar
+git clone https://github.com/Camila-jovel/Hack-aton.git
+cd Hack-aton/backend
+npm install -g .
+```
+
+**O usar directamente desde GitHub especificando la subcarpeta:**
+
+```bash
+npm install -g "git+https://github.com/Camila-jovel/Hack-aton.git#main:backend"
 ```
 
 Luego usa desde cualquier lugar:
@@ -150,7 +161,7 @@ codescanner src/
 **Opción 3: Usar con npx (sin instalación global)**
 
 ```bash
-npx -p git+https://github.com/Camila-jovel/Hack-aton.git#main codescanner archivo.js
+npx -p "git+https://github.com/Camila-jovel/Hack-aton.git#main:backend" codescanner archivo.js
 ```
 
 **Nota:** La Opción 1 es la más simple si ya tienes el proyecto descargado. No necesitas instalar nada globalmente.
@@ -253,14 +264,24 @@ node backend/cli.js src/
 
 Si quieres usar `codescanner` como comando global desde cualquier terminal:
 
+**Método recomendado: Clonar e instalar desde la carpeta backend**
+
 ```bash
-npm install -g git+https://github.com/Camila-jovel/Hack-aton.git#main
+git clone https://github.com/Camila-jovel/Hack-aton.git
+cd Hack-aton/backend
+npm install -g .
 ```
 
 Luego usa desde cualquier lugar:
 ```bash
 codescanner archivo.js
 codescanner src/
+```
+
+**Alternativa: Instalar directamente desde GitHub (especificando subcarpeta)**
+
+```bash
+npm install -g "git+https://github.com/Camila-jovel/Hack-aton.git#main:backend"
 ```
 
 **4. Interpretar el resultado**
