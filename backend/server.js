@@ -1,101 +1,114 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
+const { scanFile } = require('./scanner');
+const { analyzeFindings } = require('./aiAnalyzer');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Endpoint de prueba
+// Ruta absoluta al directorio frontend
+const frontendPath = path.join(__dirname, '../frontend');
+const indexPath = path.join(frontendPath, 'index.html');
+
+// Servir archivos estáticos del frontend (JS, CSS, etc.)
+app.use(express.static(frontendPath));
+
+// Servir index.html en la raíz
 app.get('/', (req, res) => {
+  // Verificar que el archivo existe
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).send(`
+      <h1>Error: Frontend no encontrado</h1>
+      <p>No se pudo encontrar el archivo index.html en: ${indexPath}</p>
+      <p>Verifica que la carpeta frontend exista y contenga index.html</p>
+    `);
+  }
+});
+
+// Endpoint de prueba de API
+app.get('/api', (req, res) => {
   res.send('Scanner backend funcionando');
 });
 
-/*
-  Endpoint: POST /scan
-  Recibe: { files: [ { filename, content } ] }
-  Devuelve: array de findings detectados
-*/
+// Endpoint principal de análisis
 app.post('/scan', (req, res) => {
-  const files = req.body.files || [];
-  const findings = [];
+  try {
+    const { files } = req.body;
 
-  for (const file of files) {
-    const { filename, content } = file;
-    if (!content) continue;
+    // Validar que files exista y no esté vacío
+    if (!files || !Array.isArray(files) || files.length === 0) {
+      return res.status(400).json({
+        error: 'No se recibió código para analizar',
+        message: 'Debes enviar un arreglo "files" con al menos un archivo que contenga código o logs.'
+      });
+    }
 
-    const lines = content.split(/\r?\n/);
+    const findings = [];
 
-    lines.forEach((line, index) => {
-      const lineNumber = index + 1;
-      const trimmed = line.trim();
+    // Escanear cada archivo
+    for (const file of files) {
+      const { filename, content, kind } = file;
 
-      // REGLA 1: SQL concatenado
-      const sqlRegex = /(SELECT|INSERT|UPDATE|DELETE)/i;
-      if (sqlRegex.test(trimmed) && trimmed.includes('+')) {
-        findings.push({
-          filename,
-          line: lineNumber,
-          ruleId: 'SQL_CONCAT_QUERY',
-          severity: 'high',
-          description: 'Posible SQL injection: consulta SQL construida concatenando strings.',
-          recommendation: 'Usar prepared statements o consultas parametrizadas.'
-        });
+      // Ignorar archivos vacíos o solo espacios
+      if (!content || !content.trim()) {
+        continue;
       }
 
-      // REGLA 2: eval()
-      if (trimmed.includes('eval(')) {
-        findings.push({
-          filename,
-          line: lineNumber,
-          ruleId: 'EVAL_USAGE',
-          severity: 'high',
-          description: 'Uso de eval(), puede permitir ejecución remota de código.',
-          recommendation: 'Evitar eval() y usar alternativas seguras.'
-        });
-      }
+      // Escanear el archivo
+      const fileFindings = scanFile(content, filename || 'unknown');
+      findings.push(...fileFindings);
+    }
 
-      // REGLA 3: secretos hardcodeados
-      const secretRegex = /(password|PASSWORD|API_KEY|apiKey|SECRET|token|TOKEN)/;
-      if (secretRegex.test(trimmed)) {
-        findings.push({
-          filename,
-          line: lineNumber,
-          ruleId: 'HARDCODED_SECRET',
-          severity: 'high',
-          description: 'Posible secreto o credencial hardcodeada en el código.',
-          recommendation: 'Usar variables de entorno o un gestor seguro de secretos.'
-        });
-      }
+    // Si no se encontró contenido válido
+    if (findings.length === 0 && files.every(f => !f.content || !f.content.trim())) {
+      return res.status(400).json({
+        error: 'No se encontró contenido válido para analizar',
+        message: 'Todos los archivos enviados están vacíos o contienen solo espacios en blanco.'
+      });
+    }
 
-      // REGLA 4: rutas sin autenticación
-      const isRoute =
-        trimmed.includes('app.get(') ||
-        trimmed.includes('app.post(') ||
-        trimmed.includes('router.get(') ||
-        trimmed.includes('router.post(');
+    // Análisis inteligente basado en reglas
+    const analysis = analyzeFindings(findings);
 
-      const hasAuth =
-        trimmed.includes('auth') ||
-        trimmed.includes('isAuthenticated');
+    // Construir respuesta según el formato requerido
+    const response = {
+      findings, // Lista completa de findings línea por línea
+      summary: {
+        total: analysis.metrics.total,
+        bySeverity: analysis.metrics.bySeverity,
+        riskLevel: analysis.globalSummary.riskLevel,
+        message: analysis.globalSummary.summary
+      },
+      groups: analysis.vulnerabilityTypes.map(vuln => ({
+        ruleId: vuln.ruleId,
+        name: vuln.name,
+        severity: vuln.severity,
+        count: vuln.count,
+        explanation: vuln.explanation,
+        impact: vuln.impact,
+        remediation: vuln.remediation
+      }))
+    };
 
-      if (isRoute && !hasAuth) {
-        findings.push({
-          filename,
-          line: lineNumber,
-          ruleId: 'NO_AUTH_MIDDLEWARE',
-          severity: 'medium',
-          description: 'Ruta de Express sin middleware de autenticación.',
-          recommendation: 'Agregar middleware de autenticación/autorización.'
-        });
-      }
+    res.json(response);
+
+  } catch (error) {
+    console.error('Error en /scan:', error);
+    res.status(500).json({
+      error: 'Error interno del servidor',
+      message: 'Ocurrió un error al procesar el análisis. Por favor, intenta nuevamente.'
     });
   }
-
-  res.json(findings);
 });
 
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Scanner backend escuchando en http://localhost:${PORT}`);
+  console.log(`Frontend disponible en: ${indexPath}`);
+  console.log(`Archivo existe: ${fs.existsSync(indexPath)}`);
 });
-

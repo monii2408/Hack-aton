@@ -1,14 +1,26 @@
 {
   "name": "scanner-backend",
   "version": "1.0.0",
-  "description": "Backend para el scanner de código",
+  "description": "CodeScanner - Analizador de vulnerabilidades de seguridad",
   "main": "server.js",
+  "bin": {
+    "codescanner": "./cli.js"
+  },
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "scan": "node cli.js",
+    "cli": "node cli.js"
   },
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5"
-  }
+  },
+  "keywords": [
+    "security",
+    "scanner",
+    "vulnerability",
+    "owasp",
+    "code-analysis"
+  ]
 }
 
