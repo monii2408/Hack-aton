@@ -230,13 +230,18 @@ function main() {
   if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
     console.log(colorize('CodeScanner CLI - Analizador de Vulnerabilidades', 'bright'));
     console.log('\nUso:');
-    console.log(colorize('  npm run scan -- <archivo>', 'cyan'));
-    console.log(colorize('  npm run scan -- <carpeta>', 'cyan'));
+    console.log(colorize('  codescanner <archivo>', 'cyan'));
+    console.log(colorize('  codescanner <carpeta>', 'cyan'));
     console.log('\nEjemplos:');
-    console.log('  npm run scan -- app.js');
-    console.log('  npm run scan -- src/');
-    console.log('  npm run scan -- ./backend');
-    console.log('  npm run scan -- examples/');
+    console.log('  codescanner app.js');
+    console.log('  codescanner src/');
+    console.log('  codescanner ../otro-proyecto/');
+    console.log('\nFormas de ejecutar:');
+    console.log('  - Si está instalado globalmente: codescanner archivo.js');
+    console.log('  - Desde el proyecto: npm run scan -- archivo.js');
+    console.log('  - Windows: codescanner.bat archivo.js');
+    console.log('  - Linux/Mac: ./codescanner.sh archivo.js');
+    console.log('  - Directo: node backend/cli.js archivo.js');
     console.log('\nNota: Puedes usar rutas relativas o absolutas');
     console.log('      Si es una carpeta, se analizarán todos los archivos recursivamente\n');
     process.exit(0);
@@ -251,7 +256,7 @@ function main() {
 
   if (actualArgs.length === 0) {
     console.error(colorize('Error: Debes especificar un archivo o carpeta para analizar.', 'red'));
-    console.log('Usa "npm run scan -- --help" para ver la ayuda.');
+    console.log('Usa "codescanner --help" o "npm run scan -- --help" para ver la ayuda.');
     process.exit(1);
   }
 

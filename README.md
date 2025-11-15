@@ -114,39 +114,46 @@ CodeScanner está construido con una arquitectura modular y escalable:
 - Node.js 18 o superior
 - npm (incluido con Node.js)
 
-### Instalación Rápida (Recomendada)
+### Instalación Rápida
 
-**⚠️ IMPORTANTE: Primero debes instalar CodeScanner antes de usarlo.**
+**Opción 1: Usar sin instalación (RECOMENDADO para proyectos locales)**
 
-**Paso 1: Instalar CodeScanner desde GitHub**
+Si tienes el proyecto descargado/clonado, puedes usar CodeScanner directamente:
 
-Abre cualquier terminal (PowerShell, CMD, Git Bash) y ejecuta:
+```bash
+# Desde la raíz del proyecto
+npm run scan -- archivo.js
+npm run scan -- src/
+
+# O usando el script wrapper (Windows)
+codescanner.bat archivo.js
+
+# O usando el script wrapper (Linux/Mac)
+chmod +x codescanner.sh
+./codescanner.sh archivo.js
+```
+
+**Opción 2: Instalación global (para usar desde cualquier proyecto)**
+
+Si quieres usar `codescanner` desde cualquier terminal sin estar en el proyecto:
 
 ```bash
 npm install -g git+https://github.com/Camila-jovel/Hack-aton.git#main
 ```
 
-**Paso 2: Verificar la instalación**
-
-```bash
-codescanner --help
-```
-
-Si ves el mensaje de ayuda, la instalación fue exitosa.
-
-**Paso 3: Usar CodeScanner**
-
-Ahora puedes usar `codescanner` desde cualquier lugar:
-
+Luego usa desde cualquier lugar:
 ```bash
 codescanner archivo.js
 codescanner src/
-codescanner .
 ```
 
-**¡Eso es todo!** No necesitas clonar el repositorio ni tener Git instalado. npm lo descarga automáticamente.
+**Opción 3: Usar con npx (sin instalación global)**
 
-**Nota:** Si ves el error "codescanner no se reconoce", significa que aún no está instalado. Ejecuta el comando de instalación del Paso 1.
+```bash
+npx -p git+https://github.com/Camila-jovel/Hack-aton.git#main codescanner archivo.js
+```
+
+**Nota:** La Opción 1 es la más simple si ya tienes el proyecto descargado. No necesitas instalar nada globalmente.
 
 ### Instalación
 
@@ -206,48 +213,55 @@ CodeScanner incluye una interfaz de línea de comandos que permite analizar cód
    npm run scan -- examples/
    ```
 
-**Instalación Global (desde cualquier computadora)**
+**Uso Local (Sin Instalación Global)**
 
-Para usar CodeScanner desde cualquier terminal en cualquier computadora, **NO necesitas clonar el repositorio manualmente**. npm descarga e instala automáticamente desde GitHub con un solo comando:
+Si tienes el proyecto descargado/clonado, puedes usar CodeScanner directamente sin instalación global:
 
-**Instalación desde GitHub (RECOMENDADO)**
+**Método 1: Usar npm run scan (Más simple)**
+
+```bash
+# Desde la raíz del proyecto Hackaton
+npm run scan -- archivo.js
+npm run scan -- src/
+npm run scan -- ../otro-proyecto/
+```
+
+**Método 2: Usar scripts wrapper**
+
+**Windows:**
+```bash
+codescanner.bat archivo.js
+codescanner.bat src/
+```
+
+**Linux/Mac:**
+```bash
+chmod +x codescanner.sh
+./codescanner.sh archivo.js
+./codescanner.sh src/
+```
+
+**Método 3: Ejecutar directamente**
+
+```bash
+# Desde la raíz del proyecto
+node backend/cli.js archivo.js
+node backend/cli.js src/
+```
+
+**Instalación Global (Opcional - Para usar desde cualquier proyecto)**
+
+Si quieres usar `codescanner` como comando global desde cualquier terminal:
 
 ```bash
 npm install -g git+https://github.com/Camila-jovel/Hack-aton.git#main
 ```
 
-**Ventajas:**
-- ✅ Un solo comando
-- ✅ npm descarga automáticamente desde GitHub
-- ✅ No necesitas tener Git instalado (npm lo maneja internamente)
-- ✅ Se instala globalmente, disponible desde cualquier terminal
-- ✅ Funciona en Windows, Mac y Linux
-
-**Usar desde cualquier lugar**
-
-Una vez instalado, puedes usar `codescanner` desde cualquier directorio:
-
+Luego usa desde cualquier lugar:
 ```bash
-# Analizar un archivo específico
 codescanner archivo.js
-
-# Analizar una carpeta completa (recursivo)
 codescanner src/
-
-# Analizar la carpeta actual
-codescanner .
-
-# Ver ayuda
-codescanner --help
 ```
-
-**Desinstalar (si es necesario)**
-
-```bash
-npm uninstall -g codescanner
-```
-
-**Nota:** Si prefieres tener el código fuente localmente, puedes clonar el repositorio y luego ejecutar `npm install -g .` desde la carpeta `backend`.
 
 **4. Interpretar el resultado**
 

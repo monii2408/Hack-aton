@@ -14,7 +14,8 @@
   "scripts": {
     "start": "node server.js",
     "scan": "node cli.js",
-    "cli": "node cli.js"
+    "cli": "node cli.js",
+    "codescanner": "node cli.js"
   },
   "dependencies": {
     "express": "^4.18.2",
