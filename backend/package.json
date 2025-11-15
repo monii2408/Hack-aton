@@ -1,11 +1,12 @@
 {
-  "name": "scanner-backend",
+  "name": "codescanner",
   "version": "1.0.0",
   "description": "CodeScanner - Analizador de vulnerabilidades de seguridad",
   "main": "server.js",
   "bin": {
     "codescanner": "./cli.js"
   },
+  "preferGlobal": true,
   "scripts": {
     "start": "node server.js",
     "scan": "node cli.js",

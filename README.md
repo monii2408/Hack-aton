@@ -148,25 +148,105 @@ CodeScanner está construido con una arquitectura modular y escalable:
    - Haz clic en "🔍 Analizar código"
    - Revisa los resultados en la tabla y el panel de análisis inteligente
 
-#### Opción 2: Línea de Comandos (CLI - Como compilador)
+#### Opción 2: Uso desde la Terminal (CLI)
 
-1. **Analizar un archivo**
+CodeScanner incluye una interfaz de línea de comandos que permite analizar código directamente desde la terminal, ideal para integrar en pipelines de CI/CD o para análisis rápido durante el desarrollo.
+
+**Instalación Local (desde el proyecto)**
+
+1. **Instalar dependencias**
    ```bash
    cd backend
-   node cli.js ../example-vulnerable.js
+   npm install
    ```
 
-2. **Analizar múltiples archivos**
+2. **Ejecutar el escáner**
    ```bash
-   node cli.js archivo1.js archivo2.js archivo3.js
+   # Analizar un archivo específico
+   npm run scan -- archivo.js
+
+   # Analizar una carpeta completa (recursivo)
+   npm run scan -- src/
+
+   # Analizar la carpeta de ejemplos
+   npm run scan -- examples/
    ```
 
-3. **Exportar resultados a JSON**
+**Instalación Global (desde cualquier computadora)**
+
+Para usar CodeScanner desde cualquier terminal en cualquier computadora:
+
+1. **Instalar globalmente**
    ```bash
-   node cli.js archivo.js --json
-   # O guardar en archivo:
-   node cli.js archivo.js --output report.json
+   cd backend
+   npm install -g .
    ```
+   
+   O si tienes el proyecto en GitHub:
+   ```bash
+   npm install -g git+https://github.com/Camila-jovel/Hack-aton.git#main
+   ```
+
+2. **Usar desde cualquier lugar**
+   ```bash
+   # Desde cualquier directorio, analizar un archivo
+   codescanner archivo.js
+
+   # Analizar una carpeta completa
+   codescanner src/
+
+   # Analizar la carpeta actual
+   codescanner .
+   ```
+
+3. **Desinstalar (si es necesario)**
+   ```bash
+   npm uninstall -g codescanner
+   ```
+
+**4. Interpretar el resultado**
+
+El CLI mostrará un reporte con:
+
+- **Total de vulnerabilidades**: Número total encontradas
+- **Conteo por severidad**:
+  - 🔴 **Alta severidad** (rojo): Vulnerabilidades críticas
+  - 🟡 **Media severidad** (amarillo): Vulnerabilidades que requieren atención
+  - 🔵 **Baja severidad** (azul): Problemas menores
+- **Lista detallada**: Cada vulnerabilidad muestra:
+  - Severidad
+  - Tipo (ruleId)
+  - Archivo y número de línea
+  - Descripción breve
+
+**Ejemplo de salida:**
+
+```
+================================================================================
+CodeScanner - Análisis de vulnerabilidades
+================================================================================
+
+Resumen de métricas
+--------------------------------------------------------------------------------
+Total de vulnerabilidades: 5
+  Alta severidad: 2
+  Media severidad: 3
+  Baja severidad: 0
+Archivos analizados: 2
+
+Vulnerabilidades detectadas
+--------------------------------------------------------------------------------
+
+1. [HIGH] HARDCODED_SECRET
+   Archivo: vulnerable-app.js | Línea: 4
+   Descripción: Posible secreto o credencial hardcodeada en el código.
+```
+
+Si no se detectan vulnerabilidades, verás:
+
+```
+No se detectaron vulnerabilidades en los archivos analizados.
+```
 
 ---
 

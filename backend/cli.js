@@ -2,14 +2,21 @@
 
 /**
  * CodeScanner CLI - Herramienta de línea de comandos
- * Uso: node cli.js <archivo1> [archivo2] [archivo3] ...
- * Ejemplo: node cli.js app.js server.js
+ * Uso: codescanner <archivo> | codescanner --path <carpeta>
+ * Ejemplo: codescanner app.js
+ * Ejemplo: codescanner --path src/
  */
 
 const fs = require('fs');
 const path = require('path');
-const { scanFile } = require('./scanner');
-const { analyzeFindings } = require('./aiAnalyzer');
+
+// Encontrar el directorio del módulo (funciona tanto local como globalmente)
+// Cuando se ejecuta como binario global, __dirname apunta al directorio del paquete instalado
+const backendDir = __dirname;
+
+// Importar módulos del scanner
+const { scanFile } = require(path.join(backendDir, 'scanner'));
+const { analyzeFindings } = require(path.join(backendDir, 'aiAnalyzer'));
 
 // Colores para la terminal (ANSI escape codes)
 const colors = {
@@ -31,67 +38,100 @@ function colorize(text, color) {
 function readFile(filePath) {
   try {
     if (!fs.existsSync(filePath)) {
-      console.error(colorize(`❌ Error: El archivo "${filePath}" no existe.`, 'red'));
+      console.error(colorize(`Error: El archivo "${filePath}" no existe.`, 'red'));
+      return null;
+    }
+    
+    const stats = fs.statSync(filePath);
+    if (!stats.isFile()) {
+      console.error(colorize(`Error: "${filePath}" no es un archivo.`, 'red'));
       return null;
     }
     
     const content = fs.readFileSync(filePath, 'utf8');
-    return { filename: path.basename(filePath), content };
+    return { filename: path.basename(filePath), filepath: filePath, content };
   } catch (error) {
-    console.error(colorize(`❌ Error al leer "${filePath}": ${error.message}`, 'red'));
+    console.error(colorize(`Error al leer "${filePath}": ${error.message}`, 'red'));
     return null;
   }
+}
+
+// Función para leer archivos de una carpeta recursivamente
+function readDirectory(dirPath, fileExtensions = ['.js', '.jsx', '.ts', '.tsx', '.html', '.txt']) {
+  const files = [];
+  
+  try {
+    if (!fs.existsSync(dirPath)) {
+      console.error(colorize(`Error: La carpeta "${dirPath}" no existe.`, 'red'));
+      return files;
+    }
+    
+    const stats = fs.statSync(dirPath);
+    if (!stats.isDirectory()) {
+      console.error(colorize(`Error: "${dirPath}" no es una carpeta.`, 'red'));
+      return files;
+    }
+    
+    function walkDir(currentPath) {
+      const entries = fs.readdirSync(currentPath, { withFileTypes: true });
+      
+      for (const entry of entries) {
+        const fullPath = path.join(currentPath, entry.name);
+        
+        // Ignorar node_modules, .git, y otros directorios comunes
+        if (entry.isDirectory()) {
+          if (!['node_modules', '.git', '.next', 'dist', 'build', '.vscode', '.idea'].includes(entry.name)) {
+            walkDir(fullPath);
+          }
+        } else if (entry.isFile()) {
+          const ext = path.extname(entry.name).toLowerCase();
+          if (fileExtensions.length === 0 || fileExtensions.includes(ext)) {
+            try {
+              const content = fs.readFileSync(fullPath, 'utf8');
+              files.push({
+                filename: entry.name,
+                filepath: fullPath,
+                content
+              });
+            } catch (error) {
+              console.error(colorize(`Advertencia: No se pudo leer "${fullPath}": ${error.message}`, 'yellow'));
+            }
+          }
+        }
+      }
+    }
+    
+    walkDir(dirPath);
+  } catch (error) {
+    console.error(colorize(`Error al leer la carpeta "${dirPath}": ${error.message}`, 'red'));
+  }
+  
+  return files;
 }
 
 // Función para mostrar resultados en consola
 function displayResults(findings, analysis, files) {
   console.log('\n' + '='.repeat(80));
-  console.log(colorize('🔒 CODESCANNER - REPORTE DE VULNERABILIDADES', 'bright'));
+  console.log(colorize('CodeScanner - Análisis de vulnerabilidades', 'bright'));
   console.log('='.repeat(80) + '\n');
 
-  // Resumen general
+  // Resumen de métricas
   const { summary, groups } = analysis;
-  const riskColors = {
-    'crítico': 'red',
-    'alto': 'red',
-    'medio-alto': 'yellow',
-    'medio': 'yellow',
-    'bajo': 'green'
-  };
-
-  console.log(colorize('📊 RESUMEN GENERAL', 'bright'));
+  
+  console.log(colorize('Resumen de métricas', 'bright'));
   console.log('-'.repeat(80));
-  console.log(`Archivos analizados: ${colorize(files.length, 'cyan')}`);
   console.log(`Total de vulnerabilidades: ${colorize(summary.total, summary.total > 0 ? 'red' : 'green')}`);
-  console.log(`  ${colorize('● Alta severidad:', 'red')} ${summary.bySeverity.high}`);
-  console.log(`  ${colorize('● Media severidad:', 'yellow')} ${summary.bySeverity.medium}`);
-  console.log(`  ${colorize('● Baja severidad:', 'green')} ${summary.bySeverity.low}`);
-  console.log(`Nivel de riesgo: ${colorize(summary.riskLevel.toUpperCase(), riskColors[summary.riskLevel] || 'yellow')}`);
-  console.log(`\n${summary.message}\n`);
+  console.log(`  Alta severidad: ${colorize(summary.bySeverity.high, 'red')}`);
+  console.log(`  Media severidad: ${colorize(summary.bySeverity.medium, 'yellow')}`);
+  console.log(`  Baja severidad: ${colorize(summary.bySeverity.low, 'blue')}`);
+  console.log(`Archivos analizados: ${colorize(files.length, 'cyan')}\n`);
 
-  // Grupos de vulnerabilidades
-  if (groups.length > 0) {
-    console.log(colorize('📋 VULNERABILIDADES POR TIPO', 'bright'));
-    console.log('-'.repeat(80));
-    
-    groups.forEach((group, index) => {
-      const severityColor = group.severity === 'high' ? 'red' : 
-                           group.severity === 'medium' ? 'yellow' : 'green';
-      
-      console.log(`\n${index + 1}. ${colorize(group.name, 'bright')}`);
-      console.log(`   Severidad: ${colorize(group.severity.toUpperCase(), severityColor)} | Ocurrencias: ${colorize(group.count, 'cyan')}`);
-      console.log(`   ${colorize('¿Qué es?', 'bright')} ${group.explanation}`);
-      console.log(`   ${colorize('Impacto:', 'bright')} ${group.impact}`);
-      console.log(`   ${colorize('Recomendación:', 'bright')} ${group.remediation}`);
-    });
-  }
-
-  // Detalles línea por línea
+  // Lista detallada línea por línea (PRIMERO)
   if (findings.length > 0) {
-    console.log('\n' + colorize('📝 DETALLES POR LÍNEA', 'bright'));
+    console.log(colorize('Detalles por Línea', 'bright'));
     console.log('-'.repeat(80));
     
-    // Agrupar por archivo
+    // Agrupar por archivo para mejor organización
     const byFile = {};
     findings.forEach(f => {
       if (!byFile[f.filename]) {
@@ -101,19 +141,82 @@ function displayResults(findings, analysis, files) {
     });
 
     Object.keys(byFile).forEach(filename => {
-      console.log(`\n${colorize(`📄 ${filename}`, 'cyan')}`);
-      byFile[filename].forEach(finding => {
+      console.log(`\n${colorize(`Archivo: ${filename}`, 'cyan')}`);
+      byFile[filename].forEach((finding, index) => {
         const severityColor = finding.severity === 'high' ? 'red' : 
-                             finding.severity === 'medium' ? 'yellow' : 'green';
+                             finding.severity === 'medium' ? 'yellow' : 'blue';
         const severityBadge = colorize(`[${finding.severity.toUpperCase()}]`, severityColor);
         
-        console.log(`  Línea ${colorize(finding.line, 'bright')}: ${severityBadge} ${colorize(finding.ruleId, 'magenta')}`);
-        console.log(`    ${finding.description}`);
-        console.log(`    → ${colorize(finding.recommendation, 'yellow')}`);
+        console.log(`  ${index + 1}. Línea ${colorize(finding.line, 'bright')}: ${severityBadge} ${colorize(finding.ruleId, 'magenta')}`);
+        console.log(`     ${finding.description}`);
+        console.log(`     → ${colorize(finding.recommendation, 'yellow')}`);
       });
     });
+    console.log('');
+    console.log('='.repeat(80));
+    console.log('');
   } else {
-    console.log(colorize('\n✅ No se detectaron vulnerabilidades en el código analizado.', 'green'));
+    console.log(colorize('No se detectaron vulnerabilidades en los archivos analizados.', 'green'));
+    console.log('');
+    console.log('='.repeat(80));
+    console.log('');
+  }
+
+  // Resumen global inteligente (IA basada en reglas) - AL FINAL
+  if (summary.message) {
+    console.log(colorize('ANÁLISIS INTELIGENTE - RESUMEN DE VULNERABILIDAD', 'bright'));
+    console.log('='.repeat(80));
+    console.log('');
+    
+    // Mostrar nivel de riesgo destacado
+    const riskColors = {
+      'crítico': 'red',
+      'alto': 'red',
+      'medio-alto': 'yellow',
+      'medio': 'yellow',
+      'bajo': 'green'
+    };
+    const riskColor = riskColors[summary.riskLevel] || 'yellow';
+    console.log(colorize('NIVEL DE RIESGO GENERAL:', 'bright') + ` ${colorize(summary.riskLevel.toUpperCase(), riskColor)}`);
+    console.log('');
+    
+    // Mensaje completo del análisis
+    console.log(colorize('Resumen del análisis:', 'bright'));
+    console.log(summary.message);
+    console.log('');
+    console.log('='.repeat(80));
+    console.log('');
+  }
+
+  // Grupos de vulnerabilidades con explicaciones detalladas - AL FINAL
+  if (groups && groups.length > 0) {
+    console.log(colorize('¿POR QUÉ ES VULNERABLE EL PROGRAMA?', 'bright'));
+    console.log('='.repeat(80));
+    console.log('');
+    console.log(colorize('El programa presenta vulnerabilidades en las siguientes categorías:', 'bright'));
+    console.log('');
+    
+    groups.forEach((group, index) => {
+      const severityColor = group.severity === 'high' ? 'red' : 
+                           group.severity === 'medium' ? 'yellow' : 'blue';
+      const severityBadge = colorize(`[${group.severity.toUpperCase()}]`, severityColor);
+      
+      console.log(colorize(`\n${index + 1}. ${group.name}`, 'bright') + ` ${severityBadge}`);
+      console.log(`   ${colorize('Encontradas:', 'cyan')} ${colorize(`${group.count} ocurrencia(s)`, 'cyan')}`);
+      console.log(`   ${colorize('¿Qué significa?', 'bright')}`);
+      console.log(`   ${group.explanation}`);
+      console.log(`   ${colorize('¿Cuál es el impacto?', 'bright')}`);
+      console.log(`   ${group.impact}`);
+      console.log(`   ${colorize('¿Cómo solucionarlo?', 'bright')}`);
+      console.log(`   ${group.remediation}`);
+      if (index < groups.length - 1) {
+        console.log('');
+        console.log('-'.repeat(80));
+      }
+    });
+    console.log('');
+    console.log('='.repeat(80));
+    console.log('');
   }
 
   console.log('\n' + '='.repeat(80) + '\n');
@@ -123,69 +226,93 @@ function displayResults(findings, analysis, files) {
 function main() {
   const args = process.argv.slice(2);
 
-  if (args.length === 0) {
-    console.log(colorize('🔒 CodeScanner CLI - Analizador de Vulnerabilidades', 'bright'));
-    console.log('\n📖 Uso:');
-    console.log(colorize('  node cli.js <archivo1> [archivo2] [archivo3] ...', 'cyan'));
-    console.log('\n💡 Ejemplos:');
-    console.log('  node cli.js app.js');
-    console.log('  node cli.js app.js server.js config.js');
-    console.log('  node cli.js ../example-vulnerable.js');
-    console.log('\n⚙️  Opciones:');
-    console.log('  --json          Exportar resultados en formato JSON');
-    console.log('  --output <file> Guardar reporte en archivo JSON');
-    console.log('\n📝 Nota: Puedes usar rutas relativas o absolutas');
-    console.log('   Ejemplo: node cli.js ../example-vulnerable.js\n');
+  // Mostrar ayuda si no hay argumentos
+  if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
+    console.log(colorize('CodeScanner CLI - Analizador de Vulnerabilidades', 'bright'));
+    console.log('\nUso:');
+    console.log(colorize('  npm run scan -- <archivo>', 'cyan'));
+    console.log(colorize('  npm run scan -- <carpeta>', 'cyan'));
+    console.log('\nEjemplos:');
+    console.log('  npm run scan -- app.js');
+    console.log('  npm run scan -- src/');
+    console.log('  npm run scan -- ./backend');
+    console.log('  npm run scan -- examples/');
+    console.log('\nNota: Puedes usar rutas relativas o absolutas');
+    console.log('      Si es una carpeta, se analizarán todos los archivos recursivamente\n');
     process.exit(0);
   }
 
   // Procesar argumentos
-  const files = [];
-  let jsonOutput = false;
-  let outputFile = null;
+  let targetPath = null;
+  let isDirectory = false;
 
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--json') {
-      jsonOutput = true;
-    } else if (args[i] === '--output' && i + 1 < args.length) {
-      outputFile = args[i + 1];
-      i++;
-    } else if (!args[i].startsWith('--')) {
-      files.push(args[i]);
-    }
-  }
+  // Si hay argumentos después de -- (npm run scan -- archivo)
+  const actualArgs = args.includes('--') ? args.slice(args.indexOf('--') + 1) : args;
 
-  if (files.length === 0) {
-    console.error(colorize('❌ Error: Debes especificar al menos un archivo para analizar.', 'red'));
+  if (actualArgs.length === 0) {
+    console.error(colorize('Error: Debes especificar un archivo o carpeta para analizar.', 'red'));
+    console.log('Usa "npm run scan -- --help" para ver la ayuda.');
     process.exit(1);
   }
 
-  // Leer y escanear archivos
-  const fileContents = [];
-  let hasErrors = false;
+  targetPath = actualArgs[0];
 
-  files.forEach(filePath => {
-    const file = readFile(filePath);
-    if (file) {
-      fileContents.push(file);
+  // Verificar si es archivo o carpeta
+  try {
+    const absolutePath = path.isAbsolute(targetPath) 
+      ? targetPath 
+      : path.resolve(process.cwd(), targetPath);
+    
+    if (!fs.existsSync(absolutePath)) {
+      console.error(colorize(`Error: La ruta "${targetPath}" no existe.`, 'red'));
+      process.exit(1);
+    }
+    
+    const stats = fs.statSync(absolutePath);
+    isDirectory = stats.isDirectory();
+  } catch (error) {
+    console.error(colorize(`Error: No se pudo acceder a "${targetPath}": ${error.message}`, 'red'));
+    process.exit(1);
+  }
+
+  // Leer archivos
+  let fileContents = [];
+  const absolutePath = path.isAbsolute(targetPath) 
+    ? targetPath 
+    : path.resolve(process.cwd(), targetPath);
+  
+  try {
+    if (isDirectory) {
+      // Leer carpeta recursivamente
+      fileContents = readDirectory(absolutePath);
+      
+      if (fileContents.length === 0) {
+        console.error(colorize(`Error: No se encontraron archivos para analizar en "${targetPath}".`, 'red'));
+        process.exit(1);
+      }
     } else {
-      hasErrors = true;
+      // Leer archivo individual
+      const file = readFile(absolutePath);
+      
+      if (!file) {
+        process.exit(1);
+      }
+      
+      fileContents = [file];
     }
-  });
-
-  if (fileContents.length === 0) {
-    console.error(colorize('❌ Error: No se pudo leer ningún archivo válido.', 'red'));
+  } catch (error) {
+    console.error(colorize(`Error: No se pudo acceder a "${targetPath}": ${error.message}`, 'red'));
     process.exit(1);
   }
 
-  // Escanear archivos
+  // Escanear archivos usando la misma lógica del backend
   const allFindings = [];
   fileContents.forEach(file => {
     const findings = scanFile(file.content, file.filename);
     allFindings.push(...findings);
   });
 
-  // Análisis inteligente
+  // Análisis inteligente usando la misma función del backend (IA basada en reglas)
   const analysis = analyzeFindings(allFindings);
   const result = {
     findings: allFindings,
@@ -206,19 +333,8 @@ function main() {
     }))
   };
 
-  // Mostrar o exportar resultados
-  if (jsonOutput || outputFile) {
-    const jsonResult = JSON.stringify(result, null, 2);
-    
-    if (outputFile) {
-      fs.writeFileSync(outputFile, jsonResult, 'utf8');
-      console.log(colorize(`✅ Reporte guardado en: ${outputFile}`, 'green'));
-    } else {
-      console.log(jsonResult);
-    }
-  } else {
-    displayResults(allFindings, result, fileContents);
-  }
+  // Mostrar resultados con todo el análisis inteligente
+  displayResults(allFindings, result, fileContents);
 
   // Exit code basado en vulnerabilidades encontradas
   if (allFindings.length > 0) {

@@ -51,7 +51,9 @@ const rules = [
     regex: /http:\/\/[^"'\s]+/,
     severity: "medium",
     description: "Uso de HTTP en lugar de HTTPS.",
-    recommendation: "Usar siempre HTTPS para proteger la comunicación."
+    recommendation: "Usar siempre HTTPS para proteger la comunicación.",
+    // Excluir namespaces XML estándar (no son URLs de recursos)
+    excludePattern: /xmlns\s*[:=]\s*["']http:\/\/www\.w3\.org\//
   },
   {
     ruleId: "LOCALSTORAGE_SENSITIVE",
@@ -79,6 +81,11 @@ function scanFile(content, filename) {
     // Verificar cada regla
     rules.forEach((rule) => {
       if (rule.regex.test(line)) {
+        // Verificar si hay un patrón de exclusión (para evitar falsos positivos)
+        if (rule.excludePattern && rule.excludePattern.test(line)) {
+          return; // Ignorar este match (es un falso positivo)
+        }
+        
         findings.push({
           filename,
           line: lineNumber,
