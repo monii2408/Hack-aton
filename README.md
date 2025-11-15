@@ -317,6 +317,16 @@ El CLI mostrará un reporte con:
   - Archivo y número de línea
   - Descripción breve
 
+**Archivo de Prueba:**
+
+Puedes usar el archivo `test-vulnerable-code.js` en la raíz del proyecto para probar todas las vulnerabilidades:
+
+```bash
+codescanner test-vulnerable-code.js
+```
+
+Este archivo contiene ejemplos de todas las vulnerabilidades que CodeScanner puede detectar.
+
 **Ejemplo de salida:**
 
 ```
@@ -326,18 +336,18 @@ CodeScanner - Análisis de vulnerabilidades
 
 Resumen de métricas
 --------------------------------------------------------------------------------
-Total de vulnerabilidades: 5
-  Alta severidad: 2
-  Media severidad: 3
+Total de vulnerabilidades: 15
+  Alta severidad: 8
+  Media severidad: 7
   Baja severidad: 0
-Archivos analizados: 2
+Archivos analizados: 1
 
 Vulnerabilidades detectadas
 --------------------------------------------------------------------------------
 
-1. [HIGH] HARDCODED_SECRET
-   Archivo: vulnerable-app.js | Línea: 4
-   Descripción: Posible secreto o credencial hardcodeada en el código.
+1. [HIGH] SQL_CONCAT_QUERY
+   Archivo: test-vulnerable-code.js | Línea: 15
+   Descripción: Posible SQL injection: consulta SQL construida concatenando strings.
 ```
 
 Si no se detectan vulnerabilidades, verás:
